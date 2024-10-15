@@ -20,9 +20,6 @@
             border: 1px solid #ddd;
             margin: 0;
         }
-        .error {
-            color: red;
-        }
         .collapsible {
             cursor: pointer;
             padding: 10px;
@@ -44,8 +41,6 @@
     <br><br>
     <button onclick="parseJson()">Parse</button>
 
-    <p id="error" class="error"></p>
-
     <h3>Output:</h3>
     <div id="output"></div>
 
@@ -53,8 +48,7 @@
     function parseJson() {
         const input = document.getElementById("jsonInput").value.trim();
         const outputElement = document.getElementById("output");
-        const errorElement = document.getElementById("error");
-        errorElement.textContent = "";
+
         outputElement.innerHTML = "";
 
         const jsonStrings = input.split('\n').filter(str => str.trim() !== '');
