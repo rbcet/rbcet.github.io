@@ -64,7 +64,9 @@
             const escapedJson = escapeHtml(JSON.stringify(parsedJson, null, 4));
             const highlightedJson = highlightWords(escapedJson);
 
-            return createCollapsibleElement(`JSON Object ${index + 1}`, highlightedJson);
+            console.log(parsedJson);
+
+            return createCollapsibleElement(`[JSON Object ${index + 1}] ${parsedJson?.integration || ''} ${parsedJson?.source || ''} ${parsedJson?.id || ''}`, highlightedJson);
         } catch (e) {
             return createCollapsibleElement(`Invalid JSON Object ${index + 1}: ${e.message}`, jsonStr);
         }
