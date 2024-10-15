@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOG API PARSER</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <textarea id="jsonInput"></textarea>
+    <br><br>
+    <button onclick="parseJson()">Parse</button>
+
+    <p id="error" class="error"></p>
+
+    <h3>Output:</h3>
+    <pre id="output"></pre>
+
+    
+<script>
+    function parseJson() {
+        const input = document.getElementById("jsonInput").value;
+        const outputElement = document.getElementById("output");
+        const errorElement = document.getElementById("error");
+        errorElement.textContent = "";
+        outputElement.textContent = "";
+
+        try {
+            const parsedJson = deepParseJson(JSON.parse(input));
+            const highlightedJson = highlightWords(JSON.stringify(parsedJson, null, 4));
+            outputElement.innerHTML = highlightedJson;
+        } catch (e) {
+            errorElement.textContent = "Invalid JSON: " + e.message;
+        }
+    }
+
+    function deepParseJson(obj) {
+        if (typeof obj === "object" && obj !== null) {
+            for (let key in obj) {
+                if (typeof obj[key] === "string") {
+                    try {
+                        const innerParsed = JSON.parse(obj[key]);
+                        obj[key] = deepParseJson(innerParsed);
+                    } catch (e) {
+                        // Do nothing if the value is not parseable
+                    }
+                } else if (typeof obj[key] === "object") {
+                    obj[key] = deepParseJson(obj[key]);
+                }
+            }
+        }
+        return obj;
+    }
+
+    function highlightWords(jsonStr) {
+    const keywordColorMap = {
+        "email_marketing_consent": "orange",
+        "email_optin": "orange",
+        "global_unsubscribe": "orange",
+
+        "sms_marketing_consent": "brown",
+        "sms_optin": "brown",
+        "sms_opt_out_user": "brown",
+
+        "integration": "green",
+        "source": "green",
+        "successful": "green",
+        "fail": "green"
+    };
+
+    const regex = new RegExp(`\\b(${Object.keys(keywordColorMap).join("|")})\\b`, "gi");
+
+    return jsonStr.replace(regex, (matched) => {
+        const color = keywordColorMap[matched.toLowerCase()];
+        return `<span style="background-color: ${color}; color: white;">${matched}</span>`;
+    });
+}
+
+</script>
+
+</body>
+</html>
