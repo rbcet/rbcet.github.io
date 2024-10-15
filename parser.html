@@ -48,49 +48,42 @@
     function parseJson() {
         const input = document.getElementById("jsonInput").value.trim();
         const outputElement = document.getElementById("output");
-
         outputElement.innerHTML = "";
 
         const jsonStrings = input.split('\n').filter(str => str.trim() !== '');
-
         jsonStrings.forEach((jsonStr, index) => {
-            try {
-                const parsedJson = deepParseJson(JSON.parse(jsonStr));
-                const highlightedJson = highlightWords(JSON.stringify(parsedJson, null, 4));
-                
-                const collapsibleElement = document.createElement('div');
-                collapsibleElement.classList.add('collapsible');
-                collapsibleElement.textContent = `JSON Object ${index + 1}`;
-
-                const contentElement = document.createElement('pre');
-                contentElement.classList.add('content');
-                contentElement.innerHTML = highlightedJson;
-
-                collapsibleElement.onclick = function() {
-                    this.classList.toggle('active');
-                    contentElement.style.display = contentElement.style.display === "block" ? "none" : "block";
-                };
-
-                outputElement.appendChild(collapsibleElement);
-                outputElement.appendChild(contentElement);
-            } catch (e) {
-                const collapsibleElement = document.createElement('div');
-                collapsibleElement.classList.add('collapsible');
-                collapsibleElement.textContent = `Invalid JSON Object ${index + 1}: ${e.message}`;
-                
-                const contentElement = document.createElement('pre');
-                contentElement.classList.add('content');
-                contentElement.textContent = jsonStr; // Show the invalid JSON string
-
-                collapsibleElement.onclick = function() {
-                    this.classList.toggle('active');
-                    contentElement.style.display = contentElement.style.display === "block" ? "none" : "block";
-                };
-
-                outputElement.appendChild(collapsibleElement);
-                outputElement.appendChild(contentElement);
-            }
+            const parsedResult = parseSingleJson(jsonStr, index);
+            outputElement.appendChild(parsedResult.collapsibleElement);
+            outputElement.appendChild(parsedResult.contentElement);
         });
+    }
+
+    function parseSingleJson(jsonStr, index) {
+        try {
+            const parsedJson = deepParseJson(JSON.parse(jsonStr));
+            const highlightedJson = highlightWords(JSON.stringify(parsedJson, null, 4));
+
+            return createCollapsibleElement(`JSON Object ${index + 1}`, highlightedJson);
+        } catch (e) {
+            return createCollapsibleElement(`Invalid JSON Object ${index + 1}: ${e.message}`, jsonStr);
+        }
+    }
+
+    function createCollapsibleElement(title, content) {
+        const collapsibleElement = document.createElement('div');
+        collapsibleElement.classList.add('collapsible');
+        collapsibleElement.textContent = title;
+
+        const contentElement = document.createElement('pre');
+        contentElement.classList.add('content');
+        contentElement.innerHTML = content;
+
+        collapsibleElement.onclick = function() {
+            this.classList.toggle('active');
+            contentElement.style.display = contentElement.style.display === "block" ? "none" : "block";
+        };
+
+        return { collapsibleElement, contentElement };
     }
 
     function deepParseJson(obj) {
@@ -134,7 +127,6 @@
             return `<span style="background-color: ${color}; color: white;">${matched}</span>`;
         });
     }
-
 </script>
 
 </body>
