@@ -61,7 +61,8 @@
     function parseSingleJson(jsonStr, index) {
         try {
             const parsedJson = deepParseJson(JSON.parse(jsonStr));
-            const highlightedJson = highlightWords(JSON.stringify(parsedJson, null, 4));
+            const escapedJson = escapeHtml(JSON.stringify(parsedJson, null, 4));
+            const highlightedJson = highlightWords(escapedJson);
 
             return createCollapsibleElement(`JSON Object ${index + 1}`, highlightedJson);
         } catch (e) {
@@ -69,6 +70,15 @@
         }
     }
 
+    function escapeHtml(html) {
+        return html
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+    
     function createCollapsibleElement(title, content) {
         const collapsibleElement = document.createElement('div');
         collapsibleElement.classList.add('collapsible');
@@ -117,7 +127,9 @@
             "integration": "green",
             "source": "green",
             "successful": "green",
-            "fail": "green"
+            "fail": "green",
+
+            "error": "red"
         };
 
         const regex = new RegExp(`\\b(${Object.keys(keywordColorMap).join("|")})\\b`, "gi");
