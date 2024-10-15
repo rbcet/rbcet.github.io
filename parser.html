@@ -18,9 +18,24 @@
             padding: 10px;
             border-radius: 5px;
             border: 1px solid #ddd;
+            margin: 0;
         }
         .error {
             color: red;
+        }
+        .collapsible {
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin: 5px 0;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .content {
+            display: none;
+            overflow: hidden;
+            padding-left: 10px;
         }
     </style>
 </head>
@@ -32,24 +47,56 @@
     <p id="error" class="error"></p>
 
     <h3>Output:</h3>
-    <pre id="output"></pre>
+    <div id="output"></div>
 
-    
 <script>
     function parseJson() {
-        const input = document.getElementById("jsonInput").value;
+        const input = document.getElementById("jsonInput").value.trim();
         const outputElement = document.getElementById("output");
         const errorElement = document.getElementById("error");
         errorElement.textContent = "";
-        outputElement.textContent = "";
+        outputElement.innerHTML = "";
 
-        try {
-            const parsedJson = deepParseJson(JSON.parse(input));
-            const highlightedJson = highlightWords(JSON.stringify(parsedJson, null, 4));
-            outputElement.innerHTML = highlightedJson;
-        } catch (e) {
-            errorElement.textContent = "Invalid JSON: " + e.message;
-        }
+        const jsonStrings = input.split('\n').filter(str => str.trim() !== '');
+
+        jsonStrings.forEach((jsonStr, index) => {
+            try {
+                const parsedJson = deepParseJson(JSON.parse(jsonStr));
+                const highlightedJson = highlightWords(JSON.stringify(parsedJson, null, 4));
+                
+                const collapsibleElement = document.createElement('div');
+                collapsibleElement.classList.add('collapsible');
+                collapsibleElement.textContent = `JSON Object ${index + 1}`;
+
+                const contentElement = document.createElement('pre');
+                contentElement.classList.add('content');
+                contentElement.innerHTML = highlightedJson;
+
+                collapsibleElement.onclick = function() {
+                    this.classList.toggle('active');
+                    contentElement.style.display = contentElement.style.display === "block" ? "none" : "block";
+                };
+
+                outputElement.appendChild(collapsibleElement);
+                outputElement.appendChild(contentElement);
+            } catch (e) {
+                const collapsibleElement = document.createElement('div');
+                collapsibleElement.classList.add('collapsible');
+                collapsibleElement.textContent = `Invalid JSON Object ${index + 1}: ${e.message}`;
+                
+                const contentElement = document.createElement('pre');
+                contentElement.classList.add('content');
+                contentElement.textContent = jsonStr; // Show the invalid JSON string
+
+                collapsibleElement.onclick = function() {
+                    this.classList.toggle('active');
+                    contentElement.style.display = contentElement.style.display === "block" ? "none" : "block";
+                };
+
+                outputElement.appendChild(collapsibleElement);
+                outputElement.appendChild(contentElement);
+            }
+        });
     }
 
     function deepParseJson(obj) {
@@ -71,28 +118,28 @@
     }
 
     function highlightWords(jsonStr) {
-    const keywordColorMap = {
-        "email_marketing_consent": "orange",
-        "email_optin": "orange",
-        "global_unsubscribe": "orange",
+        const keywordColorMap = {
+            "email_marketing_consent": "orange",
+            "email_optin": "orange",
+            "global_unsubscribe": "orange",
 
-        "sms_marketing_consent": "brown",
-        "sms_optin": "brown",
-        "sms_opt_out_user": "brown",
+            "sms_marketing_consent": "brown",
+            "sms_optin": "brown",
+            "sms_opt_out_user": "brown",
 
-        "integration": "green",
-        "source": "green",
-        "successful": "green",
-        "fail": "green"
-    };
+            "integration": "green",
+            "source": "green",
+            "successful": "green",
+            "fail": "green"
+        };
 
-    const regex = new RegExp(`\\b(${Object.keys(keywordColorMap).join("|")})\\b`, "gi");
+        const regex = new RegExp(`\\b(${Object.keys(keywordColorMap).join("|")})\\b`, "gi");
 
-    return jsonStr.replace(regex, (matched) => {
-        const color = keywordColorMap[matched.toLowerCase()];
-        return `<span style="background-color: ${color}; color: white;">${matched}</span>`;
-    });
-}
+        return jsonStr.replace(regex, (matched) => {
+            const color = keywordColorMap[matched.toLowerCase()];
+            return `<span style="background-color: ${color}; color: white;">${matched}</span>`;
+        });
+    }
 
 </script>
 
